@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import css from './ContactForm.module.css';
 import { nanoid } from 'nanoid';
+import { useDispatch } from 'react-redux';
+import { addContactAction } from 'redux/contact/slice';
 
-export const ContactForm = ({ onSubmit }) => {
+const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-
+  const dispatch = useDispatch();
   const idName = nanoid();
   const idNumber = nanoid();
 
@@ -14,24 +16,26 @@ export const ContactForm = ({ onSubmit }) => {
       case 'name':
         setName(value);
         break;
-
       case 'number':
         setNumber(value);
         break;
-
       default:
         break;
     }
   };
 
   const addContact = event => {
+    event.preventDefault();
+    if (name.trim() === '' || number.trim() === '') {
+      alert('Please enter both name and number.');
+      return;
+    }
     const newContact = {
       name,
       number,
       id: nanoid(),
     };
-    event.preventDefault();
-    onSubmit(newContact);
+    dispatch(addContactAction(newContact));
     resetForm();
   };
 
@@ -48,28 +52,23 @@ export const ContactForm = ({ onSubmit }) => {
         onChange={handleSetValue}
         type="text"
         name="name"
-        pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-        title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
         required
         value={name}
       />
-      <label htmlFor={idNumber}>
-        Number
-        <label />
-        <input
-          id={idNumber}
-          onChange={handleSetValue}
-          type="tel"
-          name="number"
-          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-          value={number}
-        />
-      </label>
+      <label htmlFor={idNumber}>Number</label>
+      <input
+        id={idNumber}
+        onChange={handleSetValue}
+        type="tel"
+        name="number"
+        required
+        value={number}
+      />
       <button type="submit" className={css.btn}>
         Add contact
       </button>
     </form>
   );
 };
+
+export default ContactForm;
